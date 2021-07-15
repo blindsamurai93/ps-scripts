@@ -63,14 +63,14 @@ $query=start-process "https://www.google.com/search?q=$args"
 
 ## short script to access software network folder via PS.
 function XTOOLS-QuickCMM{
-get-childitem \\alx-inf-001\gtsoftware$\* |out-gridview -title "CMM List" -passthru|foreach{
+get-childitem \\xxxx\d$\* |out-gridview -title "CMM List" -passthru|foreach{
 start-process $ExecutionContext.InvokeCommand.ExpandString($_)
 }
 }
 
 ## short script to access software network folder via PS.
 function XTOOLS-QuickMDC{
-get-childitem \\xxxx\entops\sysmgt\software\* |out-gridview -title "MDC List" -passthru|foreach{
+get-childitem \\xxxx\* |out-gridview -title "MDC List" -passthru|foreach{
 start-process $ExecutionContext.InvokeCommand.ExpandString($_)
 }
 }
