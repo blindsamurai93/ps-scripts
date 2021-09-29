@@ -1,0 +1,69 @@
+#Creating a new PSObject to store extracted data for export to CSV
+$Convert = [pscustomobject]@{
+Instrument = $Instrument
+SampleID = $SampleID
+SarsCov2 = $SarsCov2
+SarsTCycle = $SarsTCycle
+ICResult = $ICResult
+ICTCycle = $ICTCycle
+DateTime = $Date
+}
+
+$whatif = gci xxxxxxxxxxxx -Directory |Out-GridView -PassThru 
+$thisworked = gci $whatif.fullname |Out-GridView -passthru
+#$thisworked = gci $hopefully.fullname -recurse | out-gridview -passthru 
+$you = Get-Content -Path "$($thisworked.fullname)\*.dcu" -raw
+
+#A Bunch of variables being set for REGEX filters here
+$HostRE = [regex]"(Panther260)"
+$SampleRE = [regex]"[R][0-9]{9}"
+$DateRE = [regex] "(\d{14})"
+$testResultRE = [regex] "(neg|POS)"
+$SarsTCycleRE = [regex] "(\^\^\^LDT-SARS-CoV-2\^SARS-CoV-2TCycle\^\^1\|[0-9][0-9]\.[0-9]|\^\^\^LDT-SARS-CoV-2\^SARS-CoV-2TCycle\^\^1\|\-\|)"
+$ICTCycleRE = [regex] "(\^\^\^LDT-SARS-CoV-2\^ICTCycle\^\^1\|[0-9][0-9]\.[0-9])"
+$ICResultRE = [regex] "(Valid|Invalid)"
+
+#cleaning up the source text and removing special characters causing noise
+#$there = $you -replace '[\|]', ''
+#$you = $there -replace '\^', ''
+
+
+
+#Iterating through the txt file and grabbing data according to the associated REGEX pattern
+$hosty = $you|select-string -Pattern $HostRE -AllMatches 
+$Samp = $you|select-string -Pattern $SampleRE -AllMatches -list
+$Cov2 = $you|select-string -Pattern $testResultRE -AllMatches
+$ICres = $you|select-string -Pattern $ICResultRE -AllMatches
+$ICTcyc = $you|select-string -Pattern $ICTCycleRE -AllMatches
+$DateTime = $you|select-string -Pattern $dateRE -AllMatches
+$2Tcycle = $you|select-string -Pattern $SarsTCycleRE -AllMatches
+
+$convert.instrument = "$($hosty.matches.value)"
+$convert.sampleid = "$($samp.matches.value)"
+$convert.SarsCov2 = "$($cov2.matches.value)"
+$convert.SarsTCycle = "$($2tcycle.matches.value)"
+$convert.ICResult = "$($ICres.Matches.value)"
+$convert.ICTCycle = "$($ICTcyc.matches.value)"
+$convert.datetime = "$($datetime.matches.value)"
+
+$Counter = 0
+
+if($counter -lt $samp.matches.count)
+{
+
+DO{
+
+$convert.instrument = $hosty.matches.value[$counter]
+$convert.sampleid = $samp.matches.value[$counter]
+$convert.SarsCov2 = $cov2.matches.value[$counter]
+$convert.SarsTCycle = $2Tcycle.matches.value[$counter]
+$convert.ICResult = $ICres.Matches.value[$counter]
+$convert.ICTCycle = $ICTcyc.matches.value[$counter]
+$convert.datetime = $datetime.matches.value[$counter]
+
+
+$convert |export-csv -Path xxxxxxxxx.csv -append -force -NoTypeInformation
+
+$Counter++
+} until ($counter -eq $samp.matches.count)
+}
