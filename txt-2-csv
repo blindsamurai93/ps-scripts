@@ -11,11 +11,10 @@ DateTime = $Date
 
 $whatif = gci xxxxxxxxxxxx -Directory |Out-GridView -PassThru 
 $thisworked = gci $whatif.fullname |Out-GridView -passthru
-#$thisworked = gci $hopefully.fullname -recurse | out-gridview -passthru 
 $you = Get-Content -Path "$($thisworked.fullname)\*.dcu" -raw
 
 #A Bunch of variables being set for REGEX filters here
-$HostRE = [regex]"(Panther260)"
+$HostRE = [regex]"(hostname)"
 $SampleRE = [regex]"[R][0-9]{9}"
 $DateRE = [regex] "(\d{14})"
 $testResultRE = [regex] "(neg|POS)"
@@ -23,7 +22,7 @@ $SarsTCycleRE = [regex] "(\^\^\^LDT-SARS-CoV-2\^SARS-CoV-2TCycle\^\^1\|[0-9][0-9
 $ICTCycleRE = [regex] "(\^\^\^LDT-SARS-CoV-2\^ICTCycle\^\^1\|[0-9][0-9]\.[0-9])"
 $ICResultRE = [regex] "(Valid|Invalid)"
 
-#cleaning up the source text and removing special characters causing noise
+#cleaning up the source text and removing special characters causing noise (Not really needed but kept as a just in case)
 #$there = $you -replace '[\|]', ''
 #$you = $there -replace '\^', ''
 
@@ -31,7 +30,7 @@ $ICResultRE = [regex] "(Valid|Invalid)"
 
 #Iterating through the txt file and grabbing data according to the associated REGEX pattern
 $hosty = $you|select-string -Pattern $HostRE -AllMatches 
-$Samp = $you|select-string -Pattern $SampleRE -AllMatches -list
+$Samp = $you|select-string -Pattern $SampleRE -AllMatches 
 $Cov2 = $you|select-string -Pattern $testResultRE -AllMatches
 $ICres = $you|select-string -Pattern $ICResultRE -AllMatches
 $ICTcyc = $you|select-string -Pattern $ICTCycleRE -AllMatches
