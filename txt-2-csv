@@ -9,6 +9,7 @@ ICTCycle = $ICTCycle
 DateTime = $Date
 }
 
+#Nice little pop up windows that follow the folder heiarchy for user-friendliness
 $whatif = gci xxxxxxxxxxxx -Directory |Out-GridView -PassThru 
 $thisworked = gci $whatif.fullname |Out-GridView -passthru
 $you = Get-Content -Path "$($thisworked.fullname)\*.dcu" -raw
