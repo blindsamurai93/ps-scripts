@@ -1,12 +1,12 @@
 ##Lookup end user info using full name
-function XTOOLS-ADusid 
+function XTOOLS-ADuser 
 {
 Get-ADUser -Server "xxxx" -Filter "samAccountname -like '$args'" -Properties name,samaccountname,mail,info,passwordlastset,lastbadpasswordattempt,lockedout,lockouttime, enabled |select-object -Property name,samaccountname,mail,info,passwordlastset,lastbadpasswordattempt,lockedout,lockouttime, enabled| sort-object -Property samaccountname,mail,location,passwordlastset,lastbadpasswordattempt,lockedout,lockouttime, enabled -Descending |Out-GridView -Title 'User Info'
 }
 
 
 
-##Lookup end user AD info using ID
+##Lookup end user AD info using userID
 function XTOOLS-ADname 
 {
 
