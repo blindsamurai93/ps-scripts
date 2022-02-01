@@ -1,0 +1,97 @@
+#some preliminary variables that are established below. One for ensuring that all
+#data sent to the log is in the same format and the other for setting the backup location 
+$PSDefaultParameterValues['*:Encoding']='UTF8'
+$Backup = "C:\Hyper-V_Backups"
+
+#Checks to see if the backup path exists. If it doesn't, it creates a new folder on the root of C:
+#or wherever the desired backup location is set to.
+$backupPtest = test-path -path $backup
+if ($backupPtest -eq $false){new-item -path $backup -ItemType Directory}
+$LogPath = "$backup\hypervbackup_log"
+
+$test = test-path -path $LogPath
+
+if($test -eq $false){new-item -path $LogPath -ItemType Directory}
+
+    $LogFile = ("HyperV-Backup-{0:yyyy-MM-dd-HH-mm}.log" -f (Get-Date))
+    $Log = "$LogPath\$LogFile"
+
+    ## If the log file already exists, clear it
+    $LogT = Test-Path -Path $Log
+    If ($LogT)
+    {
+        Clear-Content -Path $Log
+    }
+
+    Add-Content -Path $Log -Value "****************************************"
+    Add-Content -Path $Log -Value "$(Get-Date -Format G): Log started"
+    Add-Content -Path $Log -Value ""
+
+
+
+#get all running VMs + hostname.
+#Replace $_.State with whatever parameter you want to filter VMs to backup. (ex. $_.name -eq "Super-VM-*")
+
+$Vms = Get-VM | Where-Object {$_.State -eq 'Running'}
+
+#log hostname and names of VMs that are being backed up
+If ($LogPath)
+{
+    Add-Content -Path $Log -Value "$(Get-Date -Format G): This virtual host is: $Vs"
+    Add-Content -Path $Log -Value "$(Get-Date -Format G): The following VMs will be backed up:"
+
+    ForEach ($Vm in $Vms)
+    {
+        Add-Content -Path $Log -Value "$($Vm.name)"
+    }
+}
+
+#Check for backup folder
+ForEach ($Vm in $Vms)
+{
+    $VmExport = ls "C:\Hyper-V_Backups\$Vs\$($vm.name)*"
+    If ($VmExport.creationtime -lt $(get-date -format G))
+    {
+        Remove-Item -path "$Backup\$Vs\$($Vm.name)*" -Force -Recurse
+        
+        If ($LogPath)
+        {
+            Add-Content -Path $Log -Value "$(Get-Date -Format G): Removing previous backup of $($Vm.name)"
+        }
+        Start-Sleep -S 5
+    }
+}
+#declare variables for export process and then start the export 
+$exportPath = "$Backup\$Vs\$($Vm.name)_$(get-date -format dd-M-yyyy)"
+    Add-Content -Path $Log -Value "$(Get-Date -Format G): Starting export..."
+    
+    $Vms | Export-VM -Path $exportPath -Verbose -ErrorVariable err -AsJob
+    if($err.categoryinfo.Activity -eq "Export-VM"){
+    Add-Content -Path $Log -Value "$(Get-Date -Format G): $err"
+    }
+   
+
+    ## For logging
+    If ($LogPath)
+    {
+        $VmExportTest = Test-Path "$Backup\$Vs\$($Vm.name)_$(get-date -format dd-M-yyyy)"
+        If ($VmExportTest -eq $True)
+        {
+            Add-Content -Path $Log -Value "$(Get-Date -Format G) Successfully exported specified VMs to $Backup\$Vs"
+        }
+
+        Else
+        {
+            Add-Content -Path $Log -Value "$(Get-Date -Format G) ERROR: There was a problem exporting the specified VMs to $Backup\$Vs"
+
+        }
+    }
+
+
+## If log was configured stop the log
+If ($LogPath)
+{
+    Add-Content -Path $Log -Value ""
+    Add-Content -Path $Log -Value "$(Get-Date -Format G) Log finished"
+    Add-Content -Path $Log -Value "****************************************"
+}
