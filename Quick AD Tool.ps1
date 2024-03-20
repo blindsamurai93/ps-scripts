@@ -1,3 +1,5 @@
+#Written by Xavier Fields 10/3/2023
+
 ﻿function Show-Menu {
     param (
         [string]$Title = 'Quick AD Tool'
@@ -18,7 +20,7 @@ do
       '1' {
 $username = read-host "enter user logon name (ex. cxavier)" 
 
-$userData = get-aduser -server "dcls-oosdc2.dclslab.local" -Identity $username -Properties * |select *
+$userData = get-aduser -server "[DOMAIN]" -Identity $username -Properties * |select *
 
 foreach($property in $props){
 
@@ -28,6 +30,8 @@ foreach($property in $props){
 
 
     } '2' {
+    #Pulls a list of complete AD user properties for selection from a text file. (txt file will need to be recreated when deployed in new environment.)
+    #Link to AD attribs @ https://docs.secureauth.com/0903/en/active-directory-attributes-list.html
     $ps = get-content "$env:userprofile\desktop\textfiles\ADprops.txt"
 
     $props = $ps |out-gridview -PassThru 
