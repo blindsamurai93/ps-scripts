@@ -1,4 +1,12 @@
-##Lookup end user info using full name
+#Written by Xavier Fields 3/12/2018
+
+#These are a series of functions that I created during my tenure @ Grant Thornton in Alexandria, VA.
+#I opted to create this as a module for ease of access as typing "XTOOLS-PWReset" is far more efficient (in my opinion) than having
+#to write out an entire one-liner EVERYTIME a password reset was required. 
+
+
+
+#Lookup end user info using full name
 function XTOOLS-ADuser 
 {
 Get-ADUser -Server "xxxx" -Filter "samAccountname -like '$args'" -Properties name,samaccountname,mail,info,passwordlastset,lastbadpasswordattempt,lockedout,lockouttime, enabled |select-object -Property name,samaccountname,mail,info,passwordlastset,lastbadpasswordattempt,lockedout,lockouttime, enabled| sort-object -Property samaccountname,mail,location,passwordlastset,lastbadpasswordattempt,lockedout,lockouttime, enabled -Descending |Out-GridView -Title 'User Info'
